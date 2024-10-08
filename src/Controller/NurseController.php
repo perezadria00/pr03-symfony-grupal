@@ -7,9 +7,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * @Route("/nurse") 
+ */
+
+
 class NurseController extends AbstractController
 {
-    #[Route('/nurse/name/{name}', name: 'nurses_names', methods: ['GET'], requirements: ['name' => '[a-zA-Z]+'])]
+    #[Route('/name/{name}', name: 'nurses_names', methods: ['GET'], requirements: ['name' => '[a-zA-Z]+'])]
 
     public function findByName(string $name): JsonResponse
     {
@@ -41,7 +46,7 @@ class NurseController extends AbstractController
         return new JsonResponse(array_values($foundNurses));
     }
 
-    #[Route('/nurse/index', name: 'nurse_index', methods: ['GET'])]
+    #[Route('/index', name: 'nurse_index', methods: ['GET'])]
     public function getAll(): JsonResponse
     {
         $nurses = [
