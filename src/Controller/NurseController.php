@@ -29,6 +29,7 @@ class NurseController extends AbstractController
             ['id' => 5, 'name' => 'Laura']
         ];
 
+       
         
         $foundNurses = array_filter($nurses, function ($nurse) use ($name) {
             return stripos($nurse['name'], $name) !== false;
@@ -44,13 +45,20 @@ class NurseController extends AbstractController
             );
         }
 
+       
+
         
         return new JsonResponse(array_values($foundNurses));
+        
     }
 
     #[Route('/index', name: 'nurse_index', methods: ['GET'])]
     public function getAll(): JsonResponse
+
     {
+
+        
+
         $nurses = [
             [
                 'id' => 1,
@@ -71,6 +79,8 @@ class NurseController extends AbstractController
                 'age' => 43
             ]
         ];
+
+       
 
         return new JsonResponse($nurses);
     }
