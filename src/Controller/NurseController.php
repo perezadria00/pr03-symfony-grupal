@@ -14,6 +14,27 @@ use Symfony\Component\Routing\Annotation\Route;
 class NurseController extends AbstractController
 {
 
+    #[Route('/index', name: 'nurse_index', methods: ['GET'])]
+    public function getAll(NurseRepository $nurseRepository): JsonResponse
+    {
+        // Obtener todos los enfermeros de la base de datos
+        $nurses = $nurseRepository->findAll();
+    
+        $nursesData = [];
+        foreach ($nurses as $nurse) {
+            $nursesData[] = [
+                'id' => $nurse->getId(),
+                'name' => $nurse->getName(),
+                'surname' => $nurse->getSurname(),
+            ];
+        }
+    
+        // Retornar los datos en formato JSON
+        return new JsonResponse($nursesData, JsonResponse::HTTP_OK);
+    }
+    
+
+
     #[Route('/name/{name}/{surname}', name: 'nurses_names', methods: ['GET'])]
     public function findByNameAndSurname(NurseRepository $nurseRepository, string $name, string $surname): JsonResponse
     {
@@ -54,5 +75,6 @@ class NurseController extends AbstractController
         // Si no se encuentra coincidencia, retornar un error 404
         return new JsonResponse(['message' => 'Invalid credentials'], JsonResponse::HTTP_NOT_FOUND);
     }
+
 
 }
