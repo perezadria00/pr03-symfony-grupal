@@ -16,6 +16,17 @@ class NurseRepository extends ServiceEntityRepository
         parent::__construct($registry, Nurse::class);
     }
 
+    public function findByNameAndSurname(string $name, string $surname): array
+    {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.name = :name')
+            ->andWhere('n.surname = :surname')
+            ->setParameter('name', $name)
+            ->setParameter('surname', $surname)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Nurse[] Returns an array of Nurse objects
     //     */

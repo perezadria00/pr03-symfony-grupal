@@ -1,120 +1,80 @@
 <?php
 
+// src/Controller/NurseController.php
+
 namespace App\Controller;
 
+use App\Entity\Nurse;
+use App\Repository\NurseRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-
-/**
- * @Route '/nurse'
- */
-
 class NurseController extends AbstractController
-
-
 {
-    #[Route('/name/{name}', name: 'nurses_names', methods: ['GET'], requirements: ['name' => '[a-zA-Z]+'])]
+    // private $nurseRepository;
 
-    public function findByName(string $name): JsonResponse
-    {
-        
-        $nurses = [
-            ['id' => 1, 'name' => 'Juan'],
-            ['id' => 2, 'name' => 'Ana'],
-            ['id' => 3, 'name' => 'María'],
-            ['id' => 4, 'name' => 'Pedro'],
-            ['id' => 5, 'name' => 'Laura']
-        ];
+    // public function __construct(NurseRepository $nurseRepository)
+    // {
+    //     $this->nurseRepository = $nurseRepository;
+    // }
 
-       
-        
-        $foundNurses = array_filter($nurses, function ($nurse) use ($name) {
-            return stripos($nurse['name'], $name) !== false;
-        });
+    // #[Route('/name/{name}/{surname}', name: 'nurses_names', methods: ['GET'])]
+    // public function findByNameAndSurname(NurseRepository $nurseRepository, string $name, string $surname): Response
+    // {
+    //     $foundNurses = $nurseRepository->findByNameAndSurname($name, $surname);
 
-        
-        if (empty($foundNurses)) {
-            return new JsonResponse(
-                [
-                    'error' => 'No nurses found with the given name.',
-                ],
-                Response::HTTP_NOT_FOUND
-            );
-        }
+    //     if (empty($foundNurses)) {
+    //         return new Response(
+    //             'No nurses found with the given name: ' . $name . ' and surname: ' . $surname,
+    //             Response::HTTP_NOT_FOUND
+    //         );
+    //     }
 
-       
+    //     $nurseNames = array_map(function (Nurse $nurse) {
+    //         return $nurse->getName() . ' ' . $nurse->getSurname();
+    //     }, $foundNurses);
 
-        
-        return new JsonResponse(array_values($foundNurses));
-        
-    }
+    //     return new Response(
+    //         'Found nurses: ' . implode(', ', $nurseNames),
+    //         Response::HTTP_OK
+    //     );
+    // }
 
     #[Route('/index', name: 'nurse_index', methods: ['GET'])]
-    public function getAll(): JsonResponse
-
+    public function getAll(NurseRepository $nurseRepository): Response
     {
-
-        
-
-        $nurses = [
-            [
-                'id' => 1,
-                'name' => 'Juan Pérez',
-                'specialty' => 'Cardiology',
-                'age' => 35
-            ],
-            [
-                'id' => 2,
-                'name' => 'María López',
-                'specialty' => 'Pediatrics',
-                'age' => 29
-            ],
-            [
-                'id' => 3,
-                'name' => 'Carlos García',
-                'specialty' => 'Surgery',
-                'age' => 43
-            ]
-        ];
-
-       
-
-        return new JsonResponse($nurses);
-    }
-
-
-
-    #[Route('/name/{username}/{password}', name: 'nurses_names', methods: ['GET'], requirements: ['name' => '[a-zA-Z]+'])]
-    public function login ($username, $password): JsonResponse {
+        // Obtener todos los enfermeros de la base de datos
+        $nurses = $nurseRepository->findAll();
     
-        $nurses = [
-            ['id' => 1, 'username' => 'Juan', 'password' => 'a'],
-            ['id' => 2, 'username' => 'Ana', 'password' => 'b'],
-            ['id' => 3, 'username' => 'María', 'password' => 'c'],
-            ['id' => 4, 'username' => 'Pedro', 'password' => 'd'],
-            ['id' => 5, 'username' => 'Laura', 'password' => 'e']
-        ];
-    
-        // Buscar si el usuario y la contraseña coinciden
+        $nursesData = [];
         foreach ($nurses as $nurse) {
-            if ($nurse['username'] === $username && $nurse['password'] === $password) {
-                // Retornar la información del enfermero en formato JSON
-                return new JsonResponse(true);
-            }
+            $nursesData[] = [
+                'id' => $nurse->getId(),
+                'name' => $nurse->getName(),
+                'surname' => $nurse->getSurname(),
+            ];
         }
     
-        // Si no se encuentra coincidencia, retornar un error 404
-        return new JsonResponse(false, 404);
+        return new Response(print_r($nursesData, true));
     }
-    
-    
 
-   
-    
+    // #[Route('/login/{username}/{password}', name: 'nurses_login', methods: ['GET'])]
+    // public function login(NurseRepository $nurseRepository, string $username, string $password): Response
+    // {
+    //     // Buscar enfermero por username
+    //     $nurse = $nurseRepository->findOneBy(['username' => $username]);
 
-   
+    //     // Verificar si el enfermero existe y si la contraseña coincide
+    //     if ($nurse && $nurse->getPassword() === $password) {
+    //         // Retornar verdadero si las credenciales son correctas
+    //         return new Response('Login successful', Response::HTTP_OK);
+    //     }
+
+    //     // Si no se encuentra coincidencia, retornar un error 404
+    //     return new Response('Invalid credentials', Response::HTTP_NOT_FOUND);
+    // }
 }
+
+
 
