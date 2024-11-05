@@ -8,14 +8,17 @@ use App\Entity\Nurse;
 use App\Repository\NurseRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/nurse')]
 class NurseController extends AbstractController
 {
 
+
     #[Route('/index', name: 'nurse_index', methods: ['GET'])]
-    public function getAll(NurseRepository $nurseRepository): JsonResponse
+    public function getAll(NurseRepository $nurseRepository): Response
     {
         // Obtener todos los enfermeros de la base de datos
         $nurses = $nurseRepository->findAll();
@@ -30,7 +33,7 @@ class NurseController extends AbstractController
         }
     
         // Retornar los datos en formato JSON
-        return new JsonResponse($nursesData, JsonResponse::HTTP_OK);
+        return new JsonResponse($nursesData, Response::HTTP_OK);
     }
     
 
@@ -43,7 +46,7 @@ class NurseController extends AbstractController
         if (empty($foundNurses)) {
             return new JsonResponse(
                 ['message' => 'No nurses found with the given name: ' . $name . ' and surname: ' . $surname],
-                JsonResponse::HTTP_NOT_FOUND
+                Response::HTTP_NOT_FOUND
             );
         }
 
@@ -53,7 +56,7 @@ class NurseController extends AbstractController
 
         return new JsonResponse(
             ['found_nurses' => $nurseNames],
-            JsonResponse::HTTP_OK
+            Response::HTTP_OK
         );
     }
 
@@ -69,11 +72,11 @@ class NurseController extends AbstractController
         // Verificar si el enfermero existe y si la contraseña coincide
         if ($nurse && $nurse->getPassword() === $password) {
             // Retornar verdadero si las credenciales son correctas
-            return new JsonResponse(['message' => 'Login successful'], JsonResponse::HTTP_OK);
+            return new JsonResponse(['message' => 'Login successful'], Response::HTTP_OK);
         }
 
         // Si no se encuentra coincidencia, retornar un error 404
-        return new JsonResponse(['message' => 'Invalid credentials'], JsonResponse::HTTP_NOT_FOUND);
+        return new JsonResponse(['message' => 'Invalid credentials'], Response::HTTP_NOT_FOUND);
     }
 
 
