@@ -27,15 +27,15 @@ class NurseRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByID(int $id) : array {
-
+    public function findByID(int $id): ?Nurse
+    {
         return $this->createQueryBuilder('n')
-        ->andWhere('n.id = :id')
-        ->setParameter('id', $id)
-        ->getQuery()
-        ->getResult();
-
+            ->andWhere('n.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
+    
 
    
  
