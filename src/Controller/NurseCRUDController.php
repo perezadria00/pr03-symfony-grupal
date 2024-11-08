@@ -12,20 +12,44 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-#[Route('/nurse/crud')]
+#[Route('/nurse')]
 final class NurseCRUDController extends AbstractController
 {
     //CRUD para entidad Nurse
 
     //devuelve todos los usuarios
-    #[Route(name: 'app_nurse_c_r_u_d_index', methods: ['GET'])]
-    public function index(NurseRepository $nurseRepository): Response
+    #[Route('/index', name: 'app_nurse_c_r_u_d_index', methods: ['GET'])]
+    public function getAll(NurseRepository $nurseRepository): Response
     {
-        return $this->render('nurse_crud/index.html.twig', [
-            'nurses' => $nurseRepository->findAll(),
-        ]);
+        // Obtener todos los enfermeros de la base de datos
+        $nurses = $nurseRepository->findAll();
+        
+        // Si no hay enfermeros, retornar un 400 KO
+        if (empty($nurses)) {
+            return new JsonResponse(
+                ['status' => 'error', 'message' => 'No nurses found'],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+    
+        // Procesar los datos si hay enfermeros
+        $nursesData = [];
+        foreach ($nurses as $nurse) {
+            $nursesData[] = [
+                'id' => $nurse->getId(),
+                'username' => $nurse->getUser(),
+                'name' => $nurse->getName(),
+                'surname' => $nurse->getSurname(),
+            ];
+        }
+    
+        // Retornar los datos en formato JSON con un código 201 OK
+        return new JsonResponse(
+            ['status' => 'success', 'nurses' => $nursesData],
+            Response::HTTP_CREATED
+        );
     }
-
+    
 
     //añade un usuario
     #[Route('/new', name: 'app_nurse_c_r_u_d_new', methods: ['GET', 'POST'])]
@@ -49,12 +73,35 @@ final class NurseCRUDController extends AbstractController
     }
 
     //devuelve un usuario dado un id
-    #[Route('/{id}', name: 'app_nurse_c_r_u_d_show', methods: ['GET'])]
-    public function show(Nurse $nurse): Response
-    {
-        return $this->render('nurse_crud/show.html.twig', [
-            'nurse' => $nurse,
-        ]);
+    #[Route('/find/{id}', name: 'app_nurse_c_r_u_d_show', methods: ['GET'])]
+    public function show(NurseRepository $nurseRepository, int $id): JsonResponse {
+
+        $foundNurses = $nurseRepository->findByID($id);
+
+        if (empty($foundNurses)) {
+            return new JsonResponse(
+                ['message' => 'No nurses found with the given id : ' . $id],
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        $nurseNames = array_map(function (Nurse $nurse) {
+            return [
+                'ID' => $nurse->getId(),
+                'Name' => $nurse->getName(),
+                'Surname' => $nurse->getSurname(),
+                'User' => $nurse->getUser(),
+                'Password' => $nurse->getPassword()
+            ];
+        }, $foundNurses);
+        
+        return new JsonResponse(
+            ['found_nurses' => $nurseNames],
+            Response::HTTP_OK
+        );
+        
+
+       
     }
 
     //actualiza un usuario dado un id
@@ -88,26 +135,7 @@ final class NurseCRUDController extends AbstractController
         return $this->redirectToRoute('app_nurse_c_r_u_d_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    /*#[Route('/index', name: 'nurse_index', methods: ['GET'])]
-    public function getAll(NurseRepository $nurseRepository): Response
-    {
-        // Obtener todos los enfermeros de la base de datos
-        $nurses = $nurseRepository->findAll();
-    
-        $nursesData = [];
-        foreach ($nurses as $nurse) {
-            $nursesData[] = [
-                'id' => $nurse->getId(),
-                'username' => $nurse->getUser(),
-                'name' => $nurse->getName(),
-                'surname' => $nurse->getSurname(),
-            ];
-        }
-    
-        // Retornar los datos en formato JSON
-        return new JsonResponse($nursesData, Response::HTTP_OK);
-    }
-    
+ 
     #[Route('/name/{name}/{surname}', name: 'nurses_names', methods: ['GET'])]
     public function findByNameAndSurname(NurseRepository $nurseRepository, string $name, string $surname): JsonResponse
     {
@@ -129,31 +157,6 @@ final class NurseCRUDController extends AbstractController
             Response::HTTP_OK
         );
     }
-
-    #[Route('/id/{id}', name: 'nurses_names', methods: ['GET'])]
-
-    public function findByID(NurseRepository $nurseRepository, int $id): JsonResponse {
-
-        $foundNurses = $nurseRepository->findByID($id);
-
-        if (empty($foundNurses)) {
-            return new JsonResponse(
-                ['message' => 'No nurses found with the given id : ' . $id],
-                Response::HTTP_NOT_FOUND
-            );
-        }
-
-        $nurseNames = array_map(function (Nurse $nurse) {
-            return 'ID: ' . $nurse->getId() . "\nName: " . $nurse->getName();
-        }, $foundNurses);
-        
-
-        return new JsonResponse(
-            ['found_nurses' => $nurseNames],
-            Response::HTTP_OK
-        );
-
-    }
     
     #[Route('/login/{username}/{password}', name: 'nurses_login', methods: ['GET'])]
     public function login(NurseRepository $nurseRepository, string $username, string $password): JsonResponse
@@ -169,5 +172,5 @@ final class NurseCRUDController extends AbstractController
 
         // Si no se encuentra coincidencia, retornar un error 404
         return new JsonResponse(['message' => 'Invalid credentials'], Response::HTTP_NOT_FOUND);
-    }*/
+    }
 }
