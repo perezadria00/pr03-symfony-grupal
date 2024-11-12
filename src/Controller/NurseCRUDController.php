@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/nurse')]
 final class NurseCRUDController extends AbstractController
@@ -101,35 +102,54 @@ final class NurseCRUDController extends AbstractController
         return new JsonResponse(['nurse' => $nurseData], Response::HTTP_OK);
     }
 
-    // Actualiza un usuario dado un id
-    #[Route('/{id}/edit', name: 'app_nurse_c_r_u_d_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Nurse $nurse, EntityManagerInterface $entityManager): Response
+    //actualiza un usuario dado un id
+    #[Route('/{id}/edit', name: 'app_nurse_c_r_u_d_edit', methods: ['PUT'])]
+    public function edit(int $id, Request $request, NurseRepository $nurseRepository, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
     {
-        $form = $this->createForm(NurseType::class, $nurse);
-        $form->handleRequest($request);
+        $nurse = $nurseRepository->find($id);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_nurse_c_r_u_d_index', [], Response::HTTP_SEE_OTHER);
+        // Si el id introducido no se encuentra, muestra error 404
+        if (!$nurse) {
+            return $this->json(['error' => 'Nurse not found'], Response::HTTP_NOT_FOUND);
         }
 
-        return $this->render('nurse_crud/edit.html.twig', [
-            'nurse' => $nurse,
-            'form' => $form,    
-        ]);
+        $data = json_decode($request->getContent(), true);
+
+        // Si el id introducido se encuentra pero los datos de usuario o contraseña están vacios, muestra un error 400
+        $nurse->setUser($data['user'] ?? $nurse->getUser());
+        $nurse->setPassword($data['password'] ?? $nurse->getPassword());
+        $nurse->setName($data['name'] ?? $nurse->getName());
+        $nurse->setSurname($data['surname'] ?? $nurse->getSurname());
+
+        $errors = $validator->validate($nurse);
+
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return $this->json(['status' => 'error', 'errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
+        }
+
+        $entityManager->flush();
+
+        return $this->json(['status' => 'success', 'message' => 'Nurse updated successfully'], Response::HTTP_OK);
     }
 
-    // Elimina un usuario dado un id
-    #[Route('/{id}', name: 'app_nurse_c_r_u_d_delete', methods: ['POST'])]
-    public function delete(Request $request, Nurse $nurse, EntityManagerInterface $entityManager): Response
+    //elimina un usuario dado un id
+    #[Route('/{id}', name: 'app_nurse_c_r_u_d_delete', methods: ['DELETE'])]
+    public function delete(int $id, NurseRepository $nurseRepository, EntityManagerInterface $entityManager): JsonResponse
     {
-        if ($this->isCsrfTokenValid('delete' . $nurse->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($nurse);
-            $entityManager->flush();
+        $nurse = $nurseRepository->find($id);
+
+        if (!$nurse) {
+            return $this->json(['error' => 'Nurse not found'], Response::HTTP_NOT_FOUND);
         }
 
-        return $this->redirectToRoute('app_nurse_c_r_u_d_index', [], Response::HTTP_SEE_OTHER);
+        $entityManager->remove($nurse);
+        $entityManager->flush();
+
+        return $this->json(['status' => 'success', 'message' => 'Nurse deleted successfully'], Response::HTTP_OK);
     }
 
     // Buscar enfermeros por nombre y apellido
