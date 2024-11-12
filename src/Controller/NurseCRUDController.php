@@ -48,35 +48,59 @@ final class NurseCRUDController extends AbstractController
         );
     }
 
-    // Añadir un nuevo enfermero
-    #[Route('/new', name: 'app_nurse_c_r_u_d_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $nurse = new Nurse();
-        $form = $this->createForm(NurseType::class, $nurse);
-        $form->handleRequest($request);
+// Añadir un nuevo enfermero
+#[Route('/new', name: 'app_nurse_c_r_u_d_new', methods: ['POST'])]
+public function new(Request $request, EntityManagerInterface $entityManager): Response
+{
+    // Crear nuevo objeto Nurse
+    $nurse = new Nurse();
 
-        if ($request->isMethod('POST') && $form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($nurse);
-            $entityManager->flush();
+    // Decodificar la solicitud JSON
+    $data = json_decode($request->getContent(), true);
 
-            return $this->json([
-                'status' => 'success',
-                'nurse' => [
-                    'id' => $nurse->getId(),
-                    'name' => $nurse->getName(),
-                    'surname' => $nurse->getSurname(),
-                    'user' => $nurse->getUser(),
-                    'password' => $nurse->getPassword()
-                ]
-            ], Response::HTTP_CREATED);
-        }
-
-        return $this->render('nurse_crud/new.html.twig', [
-            'nurse' => $nurse,
-            'form' => $form->createView(),
-        ]);
+    if ($data === null) {
+        return $this->json([
+            'status' => 'error',
+            'message' => 'Invalid JSON'
+        ], Response::HTTP_BAD_REQUEST);
     }
+
+    // Configurar los valores del objeto Nurse usando los datos proporcionados
+    if (isset($data['user'], $data['password'], $data['name'], $data['surname'])) {
+        $nurse->setUser($data['user']);
+        $nurse->setPassword($data['password']);  // **Importante**: Hashear la contraseña en una implementación real
+        $nurse->setName($data['name']);
+        $nurse->setSurname($data['surname']);
+    } else {
+        return $this->json([
+            'status' => 'error',
+            'message' => 'Missing required fields'
+        ], Response::HTTP_BAD_REQUEST);
+    }
+
+    // Guardar el objeto Nurse en la base de datos
+    try {
+        $entityManager->persist($nurse);
+        $entityManager->flush();
+    } catch (\Exception $e) {
+        return $this->json([
+            'status' => 'error',
+            'message' => 'Failed to save the nurse: ' . $e->getMessage()
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
+    // Retornar el JSON de éxito
+    return $this->json([
+        'status' => 'success',
+        'nurse' => [
+            'id' => $nurse->getId(),
+            'name' => $nurse->getName(),
+            'surname' => $nurse->getSurname(),
+            'user' => $nurse->getUser(),
+            'password' => $nurse->getPassword()  // **No devolver la contraseña en producción**
+        ]
+    ], Response::HTTP_CREATED);
+}
 
     // Devuelve un usuario dado un id
     #[Route('/{id}', name: 'app_nurse_c_r_u_d_show', methods: ['GET'])]
@@ -185,4 +209,3 @@ final class NurseCRUDController extends AbstractController
         return new JsonResponse(['message' => 'Invalid credentials'], Response::HTTP_NOT_FOUND);
     }
 }
-
