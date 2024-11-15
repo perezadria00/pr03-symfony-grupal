@@ -133,9 +133,11 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
         $nurse = $nurseRepository->find($id);
 
         // Si el id introducido no se encuentra, muestra error 404
-        if (!$nurse) {
-            return $this->json(['error' => 'Nurse not found'], Response::HTTP_NOT_FOUND);
-        }
+    if (!$nurse) {
+        // En vez de lanzar una excepción, devuelve una respuesta adecuada
+        return $this->json(['error' => 'Nurse not found'], Response::HTTP_NOT_FOUND);
+    }
+    
 
         $data = json_decode($request->getContent(), true);
 
