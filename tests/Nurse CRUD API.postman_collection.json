@@ -1,0 +1,208 @@
+{
+	"info": {
+		"_postman_id": "a577f5d2-d1d8-422f-8099-2c5f413182bb",
+		"name": "Nurse CRUD API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38623195"
+	},
+	"item": [
+		{
+			"name": "Get All Nurses",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/nurse/index",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"nurse",
+						"index"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Nurse",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n                        \"user\": \"example_user\",\n                        \"password\": \"example_password\",\n                        \"name\": \"Example\",\n                        \"surname\": \"User\"\n                    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/nurse/new",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"nurse",
+						"new"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Nurse by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/nurse/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"nurse",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "8",
+							"description": "ID of the nurse"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Nurse by ID",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n                        \"user\": \"updated_user\",\n                        \"password\": \"updated_password\",\n                        \"name\": \"Updated\",\n                        \"surname\": \"User\"\n                    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/nurse/:id/edit",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"nurse",
+						":id",
+						"edit"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "1",
+							"description": "ID of the nurse"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Nurse by ID",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/nurse/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"nurse",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"description": "ID of the nurse"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Find Nurses by Name and Surname",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/nurse/name/:name/:surname",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"nurse",
+						"name",
+						":name",
+						":surname"
+					],
+					"variable": [
+						{
+							"key": "name",
+							"description": "First name of the nurse"
+						},
+						{
+							"key": "surname",
+							"description": "Surname of the nurse"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login Nurse",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/nurse/login/:username/:password",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"nurse",
+						"login",
+						":username",
+						":password"
+					],
+					"variable": [
+						{
+							"key": "username",
+							"value": "clopez",
+							"description": "Username of the nurse"
+						},
+						{
+							"key": "password",
+							"value": "bestnurse456",
+							"description": "Password of the nurse"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000/api",
+			"type": "string"
+		}
+	]
+}
