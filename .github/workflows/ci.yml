@@ -1,0 +1,41 @@
+name: Symfony CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Paso 1: Clonar el repositorio
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Paso 2: Configurar PHP
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.2
+        extensions: mbstring, intl, pdo_mysql
+        ini-values: memory_limit=-1
+        coverage: none
+
+    # Paso 3: Instalar dependencias de Composer
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    # Paso 4: Configurar base de datos MySQL
+    - name: Set up MySQL database
+      run: |
+        sudo mysql -e "CREATE DATABASE nurse_administration_test;"
+        php bin/console doctrine:schema:update --force --env=test
+
+    # Paso 5: Ejecutar pruebas unitarias
+    - name: Run PHPUnit tests
+      run: php bin/phpunit
