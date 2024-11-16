@@ -47,7 +47,7 @@ jobs:
     - name: Install Composer dependencies
       run: composer install --prefer-dist --no-progress --no-suggest
 
-    # Paso 4: Esperar a que el servicio MySQL esté listo
+    # Paso 4: Esperar a que MySQL esté listo
     - name: Wait for MySQL to be ready
       run: |
         for i in {1..10}; do
@@ -62,7 +62,7 @@ jobs:
     # Paso 5: Crear la base de datos
     - name: Create database
       run: |
-        mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE DATABASE nurses_administration;"
+        mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE DATABASE IF NOT EXISTS nurses_administration;"
 
     # Paso 6: Configurar la base de datos con Doctrine
     - name: Set up database
@@ -71,3 +71,4 @@ jobs:
     # Paso 7: Ejecutar pruebas unitarias
     - name: Run PHPUnit tests
       run: php bin/phpunit
+
