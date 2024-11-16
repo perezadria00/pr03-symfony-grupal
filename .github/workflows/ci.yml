@@ -27,7 +27,8 @@ jobs:
           MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
 
     env:
-      DATABASE_URL: mysql://root@127.0.0.1:3306/nurses_administration
+      APP_ENV: test
+      DATABASE_URL: mysql://root@127.0.0.1:3306/nurses_administration_test
 
     steps:
     # Paso 1: Clonar el repositorio
@@ -59,10 +60,10 @@ jobs:
           sleep 5
         done
 
-    # Paso 5: Crear la base de datos
+    # Paso 5: Crear la base de datos de pruebas
     - name: Create database
       run: |
-        mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE DATABASE IF NOT EXISTS nurses_administration;"
+        mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE DATABASE IF NOT EXISTS nurses_administration_test;"
 
     # Paso 6: Configurar la base de datos con Doctrine
     - name: Set up database
@@ -71,4 +72,3 @@ jobs:
     # Paso 7: Ejecutar pruebas unitarias
     - name: Run PHPUnit tests
       run: php bin/phpunit
-
