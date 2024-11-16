@@ -50,7 +50,7 @@ jobs:
 
     - name: Wait for MySQL to be ready
       run: |
-        MAX_RETRIES=12
+        MAX_RETRIES=3
         RETRIES=0
         until mysqladmin ping -h mysql -u root --password=root --silent; do
           echo "Waiting for MySQL... ($RETRIES/$MAX_RETRIES)"
