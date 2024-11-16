@@ -45,6 +45,13 @@ jobs:
     - name: Install Composer dependencies
       run: composer install --no-progress --no-suggest --prefer-dist
 
+    - name: Wait for MySQL to be ready
+      run: |
+        until mysqladmin ping -h 127.0.0.1 -u root --password=root --silent; do
+          echo "Waiting for MySQL...";
+          sleep 5;
+        done
+
     - name: Prepare the database
       run: |
         php bin/console doctrine:database:create --env=test || true
