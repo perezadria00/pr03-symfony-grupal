@@ -34,5 +34,9 @@ jobs:
     # Paso 4: Configurar base de datos MySQL
     - name: Set up MySQL database
       run: |
-        sudo mysql -e "CREATE DATABASE nurse_administration_test;"
-        php bin/consol
+        sudo mysql -e "CREATE DATABASE nurse_administration;"
+        php bin/console doctrine:schema:update --force --env=test
+
+    # Paso 5: Ejecutar pruebas unitarias
+    - name: Run PHPUnit tests
+      run: php bin/phpunit
