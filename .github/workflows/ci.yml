@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 20-configurar-servicio-de-integración-continua
   pull_request:
     branches:
       - main
@@ -34,8 +35,4 @@ jobs:
     - name: Set up MySQL database
       run: |
         sudo mysql -e "CREATE DATABASE nurse_administration_test;"
-        php bin/console doctrine:schema:update --force --env=test
-
-    # Paso 5: Ejecutar pruebas unitarias
-    - name: Run PHPUnit tests
-      run: php bin/phpunit
+        php bin/consol
