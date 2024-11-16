@@ -3,7 +3,7 @@ name: CI Symfony Tests
 on:
   pull_request:
     branches:
-      - configurar-servicio-de-integración-continua-v2
+      - main
 
 jobs:
   php-tests:
