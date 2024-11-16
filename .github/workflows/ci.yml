@@ -1,0 +1,56 @@
+name: CI Symfony Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  php-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: nurses_administration
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=15
+        ports:
+          - 3306:3306
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, intl, pdo_mysql
+        ini-values: post_max_size=256M, upload_max_filesize=256M
+        coverage: none
+
+    - name: List running Docker containers
+      run: docker ps -a
+
+    - name: Test MySQL connection
+      run: echo "SHOW DATABASES;" | mysql -h 127.0.0.1 -u root --password=root
+
+    - name: Get MySQL logs
+      run: docker logs $(docker ps -q --filter "ancestor=mysql:8.0")
+
+    - name: Install Composer dependencies
+      run: composer install --no-progress --no-suggest --prefer-dist
+
+    - name: Prepare the database
+      run: |
+        php bin/console doctrine:database:create --env=test || true
+        php bin/console doctrine:schema:update --force --env=test
+
+    - name: Run PHPUnit tests
+      run: vendor/bin/phpunit
