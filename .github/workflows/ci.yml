@@ -13,6 +13,20 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: nurse_administration_test
+
     steps:
     # Paso 1: Clonar el repositorio
     - name: Checkout code
@@ -31,12 +45,22 @@ jobs:
     - name: Install Composer dependencies
       run: composer install --prefer-dist --no-progress --no-suggest
 
-    # Paso 4: Configurar base de datos MySQL
-    - name: Set up MySQL database
+    # Paso 4: Esperar a que el servicio MySQL esté listo
+    - name: Wait for MySQL to be ready
       run: |
-        sudo mysql -e "CREATE DATABASE nurses_administration;"
-        php bin/console doctrine:schema:update --force --env=test
+        for i in {1..10}; do
+          if mysql -h 127.0.0.1 -P 3306 -u root -proot -e "SELECT 1;" > /dev/null 2>&1; then
+            echo "MySQL is ready"
+            break
+          fi
+          echo "Waiting for MySQL..."
+          sleep 5
+        done
 
-    # Paso 5: Ejecutar pruebas unitarias
+    # Paso 5: Configurar la base de datos
+    - name: Set up database
+      run: php bin/console doctrine:schema:update --force --env=test
+
+    # Paso 6: Ejecutar pruebas unitarias
     - name: Run PHPUnit tests
       run: php bin/phpunit
