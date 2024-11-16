@@ -62,8 +62,9 @@ jobs:
           fi
         done
 
-    - name: Prepare the database
+    - name: Create database manually
       run: |
+        echo "CREATE DATABASE nurses_administration;" | mysql -h mysql -u root --password=root
         php bin/console doctrine:database:create --env=test || true
         php bin/console doctrine:schema:update --force --env=test
 
