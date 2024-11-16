@@ -14,7 +14,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: test_db
+          MYSQL_DATABASE: nurses_administration
         options: >-
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
