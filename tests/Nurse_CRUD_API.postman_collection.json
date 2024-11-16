@@ -1,0 +1,190 @@
+{
+    "info": {
+        "name": "Nurse CRUD API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Get All Nurses",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/nurse/index",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "nurse",
+                        "index"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Create Nurse",
+            "request": {
+                "method": "POST",
+                "url": {
+                    "raw": "{{baseUrl}}/nurse/new",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "nurse",
+                        "new"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n                        \"user\": \"example_user\",\n                        \"password\": \"example_password\",\n                        \"name\": \"Example\",\n                        \"surname\": \"User\"\n                    }"
+                },
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Get Nurse by ID",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/nurse/:1",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "nurse",
+                        ":id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "description": "ID of the nurse"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Update Nurse by ID",
+            "request": {
+                "method": "PUT",
+                "url": {
+                    "raw": "{{baseUrl}}/nurse/:id/edit",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "nurse",
+                        ":id",
+                        "edit"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "description": "ID of the nurse"
+                        }
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n                        \"user\": \"updated_user\",\n                        \"password\": \"updated_password\",\n                        \"name\": \"Updated\",\n                        \"surname\": \"User\"\n                    }"
+                },
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Delete Nurse by ID",
+            "request": {
+                "method": "DELETE",
+                "url": {
+                    "raw": "{{baseUrl}}/nurse/:id",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "nurse",
+                        ":id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "description": "ID of the nurse"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Find Nurses by Name and Surname",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/nurse/name/:name/:surname",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "nurse",
+                        "name",
+                        ":name",
+                        ":surname"
+                    ],
+                    "variable": [
+                        {
+                            "key": "name",
+                            "description": "First name of the nurse"
+                        },
+                        {
+                            "key": "surname",
+                            "description": "Surname of the nurse"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Login Nurse",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/nurse/login/:username/:password",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "nurse",
+                        "login",
+                        ":username",
+                        ":password"
+                    ],
+                    "variable": [
+                        {
+                            "key": "username",
+                            "description": "Username of the nurse"
+                        },
+                        {
+                            "key": "password",
+                            "description": "Password of the nurse"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8000/api",
+            "type": "string"
+        }
+    ]
+}
