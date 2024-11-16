@@ -14,7 +14,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: nurses_administration
+          MYSQL_DATABASE: test_db
         options: >-
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
@@ -45,28 +45,7 @@ jobs:
     - name: Install Composer dependencies
       run: composer install --no-progress --no-suggest --prefer-dist
 
-    - name: Set DATABASE_URL for GitHub Actions
-      env:
-        DATABASE_URL: mysql://root:root@mysql:3306/nurses_administration
-      run: echo "DATABASE_URL set for GitHub Actions"
-
-    - name: Wait for MySQL to be ready
-      run: |
-        MAX_RETRIES=3
-        RETRIES=0
-        until mysqladmin ping -h mysql -u root --password=root --silent; do
-          echo "Waiting for MySQL... ($RETRIES/$MAX_RETRIES)"
-          sleep 5
-          RETRIES=$((RETRIES + 1))
-          if [ $RETRIES -ge $MAX_RETRIES ]; then
-            echo "MySQL is not ready after $MAX_RETRIES retries. Exiting..."
-            exit 1
-          fi
-        done
-
     - name: Prepare the database
-      env:
-        DATABASE_URL: mysql://root:root@mysql:3306/nurses_administration
       run: |
         php bin/console doctrine:database:create --env=test || true
         php bin/console doctrine:schema:update --force --env=test
