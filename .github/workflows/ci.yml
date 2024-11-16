@@ -13,7 +13,7 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: root
+          MYSQL_ROOT_PASSWORD:
           MYSQL_DATABASE: nurses_administration
         options: >-
           --health-cmd="mysqladmin ping --silent"
