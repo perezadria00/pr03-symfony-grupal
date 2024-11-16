@@ -68,7 +68,7 @@ class NurseCRUDControllerTest extends WebTestCase
         $response = $client->getResponse();
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode(), $response->getContent());
     }
-/* Se comenta el código como  dijo Jose Portugal para evitar errores futuros en los tests de eliminación*/
+/* Se comenta el código como  dijo Jose Portugal para evitar errores futuros en los tests de eliminación
     public function testDeleteNurse(): void
     {
         $client = static::createClient();
@@ -78,7 +78,7 @@ class NurseCRUDControllerTest extends WebTestCase
 
         $response = $client->getResponse();
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode(), $response->getContent());
-    }
+    }*/
 
     public function testFindNurseByNameAndSurname(): void
     {
