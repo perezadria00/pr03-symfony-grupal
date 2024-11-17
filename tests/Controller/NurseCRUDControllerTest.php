@@ -99,12 +99,19 @@ class NurseCRUDControllerTest extends WebTestCase
             'surname' => 'Test'
         ]));
     
-        // Obtener el ID del enfermero recién creado
         $response = $client->getResponse();
+    
+        // Verifica que el POST fue exitoso
+        $this->assertEquals(
+            Response::HTTP_CREATED,
+            $response->getStatusCode(),
+            "Failed asserting POST /nurse/new returns 201. Response: " . $response->getContent()
+        );
+    
         $data = json_decode($response->getContent(), true);
         $nurseId = $data['nurse']['id'] ?? null;
     
-        // Asegúrate de que se haya creado correctamente
+        // Verifica que el ID se haya generado
         $this->assertNotNull($nurseId, "Failed to create a nurse for the DELETE test.");
     
         // Eliminar el enfermero
@@ -126,6 +133,7 @@ class NurseCRUDControllerTest extends WebTestCase
             "Failed asserting GET /nurse/{$nurseId} after delete returns 404. Response: " . $response->getContent()
         );
     }
+    
     
 
     public function testFindNurseByNameAndSurname(): void
