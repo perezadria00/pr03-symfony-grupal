@@ -28,7 +28,7 @@ jobs:
 
     env:
       APP_ENV: test
-      DATABASE_URL: mysql://root@127.0.0.1:3306/nurses_administration_test
+      DATABASE_URL: mysql://root@127.0.0.1:3306/nurses_administration
 
     steps:
     # Paso 1: Clonar el repositorio
@@ -63,7 +63,7 @@ jobs:
     # Paso 5: Crear la base de datos de pruebas
     - name: Create database
       run: |
-        mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE DATABASE IF NOT EXISTS nurses_administration_test;"
+        mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE DATABASE IF NOT EXISTS nurses_administration;"
 
     # Paso 6: Configurar la base de datos con Doctrine
     - name: Set up database
