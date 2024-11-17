@@ -60,7 +60,7 @@ jobs:
           sleep 5
         done
 
-    # Paso 5: Crear la base de datos de pruebas
+    # Paso 5: Crear la base de datos
     - name: Create database
       run: |
         mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE DATABASE IF NOT EXISTS nurses_administration;"
@@ -69,6 +69,10 @@ jobs:
     - name: Set up database
       run: php bin/console doctrine:schema:update --force --env=test
 
-    # Paso 7: Ejecutar pruebas unitarias
+    # Paso 7: Cargar datos de prueba
+    - name: Load fixtures
+      run: php bin/console doctrine:fixtures:load --no-interaction --env=test
+
+    # Paso 8: Ejecutar pruebas unitarias
     - name: Run PHPUnit tests
       run: php bin/phpunit
