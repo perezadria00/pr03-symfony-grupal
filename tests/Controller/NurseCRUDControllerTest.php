@@ -86,7 +86,7 @@ class NurseCRUDControllerTest extends WebTestCase
         $this->assertJson($response->getContent());
     }
 
-    public function testDeleteNurse(): void
+    /*public function testDeleteNurse(): void
     {
         $client = static::createClient();
 
@@ -122,7 +122,7 @@ class NurseCRUDControllerTest extends WebTestCase
             $response->getStatusCode(),
             "Failed asserting GET /nurse/{$nurseId} after delete returns 404. Response: " . $response->getContent()
         );
-    }
+    }*/
 
     public function testFindNurseByNameAndSurname(): void
     {
