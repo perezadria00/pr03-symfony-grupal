@@ -34,16 +34,8 @@ jobs:
     # Paso 1: Clonar el repositorio
     - name: Checkout code
       uses: actions/checkout@v3
-      with:
-        submodules: true # Habilitar la actualización de submódulos al clonar
 
-    # Paso 2: Inicializar y actualizar submódulos (si existen)
-    - name: Initialize and update Git submodules
-      run: |
-        git submodule init
-        git submodule update --recursive
-
-    # Paso 3: Configurar PHP
+    # Paso 2: Configurar PHP
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
@@ -52,11 +44,11 @@ jobs:
         ini-values: memory_limit=-1
         coverage: none
 
-    # Paso 4: Instalar dependencias de Composer
+    # Paso 3: Instalar dependencias de Composer
     - name: Install Composer dependencies
       run: composer install --prefer-dist --no-progress --no-suggest
 
-    # Paso 5: Esperar a que MySQL esté listo
+    # Paso 4: Esperar a que MySQL esté listo
     - name: Wait for MySQL to be ready
       run: |
         for i in {1..10}; do
@@ -68,19 +60,19 @@ jobs:
           sleep 5
         done
 
-    # Paso 6: Crear la base de datos
+    # Paso 5: Crear la base de datos
     - name: Create database
       run: |
         mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE DATABASE IF NOT EXISTS nurses_administration;"
 
-    # Paso 7: Configurar la base de datos con Doctrine
+    # Paso 6: Configurar la base de datos con Doctrine
     - name: Set up database
       run: php bin/console doctrine:schema:update --force --env=test
 
-    # Paso 8: Cargar datos de prueba
+    # Paso 7: Cargar datos de prueba
     - name: Load fixtures
       run: php bin/console doctrine:fixtures:load --no-interaction --env=test
 
-    # Paso 9: Ejecutar pruebas unitarias
+    # Paso 8: Ejecutar pruebas unitarias
     - name: Run PHPUnit tests
       run: php bin/phpunit
