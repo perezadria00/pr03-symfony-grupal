@@ -60,7 +60,6 @@ class NurseCRUDControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
-        // Cambia el ID a uno que esté seguro de que existe en las fixtures (por ejemplo, ID 1)
         $client->request('GET', '/nurse/1');
 
         $response = $client->getResponse();
@@ -76,7 +75,6 @@ class NurseCRUDControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
-        // Cambia el ID a uno que esté seguro de que existe en las fixtures (por ejemplo, ID 1)
         $client->request('PUT', '/nurse/1/edit', [], [], ['CONTENT_TYPE' => 'application/json'], json_encode([
             'name' => 'Updated Name New'
         ]));
@@ -86,6 +84,30 @@ class NurseCRUDControllerTest extends WebTestCase
             Response::HTTP_OK,
             $response->getStatusCode(),
             "Failed asserting PUT /nurse/1/edit returns 200. Response: " . $response->getContent()
+        );
+    }
+
+    public function testDeleteNurse(): void
+    {
+        $client = static::createClient();
+
+        // Asegúrate de que existe un enfermero con ID 1
+        $client->request('DELETE', '/nurse/1');
+
+        $response = $client->getResponse();
+        $this->assertEquals(
+            Response::HTTP_OK,
+            $response->getStatusCode(),
+            "Failed asserting DELETE /nurse/1 returns 200. Response: " . $response->getContent()
+        );
+
+        // Verifica que el enfermero fue eliminado
+        $client->request('GET', '/nurse/1');
+        $response = $client->getResponse();
+        $this->assertEquals(
+            Response::HTTP_NOT_FOUND,
+            $response->getStatusCode(),
+            "Failed asserting GET /nurse/1 after delete returns 404. Response: " . $response->getContent()
         );
     }
 
