@@ -18,17 +18,19 @@ class NurseCRUDControllerTest extends WebTestCase
             $response->getStatusCode(),
             "Failed asserting GET /nurse/index returns 200. Response: " . $response->getContent()
         );
-        $this->assertJson($response->getContent());
+
+        $data = json_decode($response->getContent(), true);
+        $this->assertCount(4, $data['nurses'], "Expected 4 nurses, found: " . count($data['nurses']));
     }
 
     public function testCreateNurseWithValidData(): void
     {
         $client = static::createClient();
         $client->request('POST', '/nurse/new', [], [], ['CONTENT_TYPE' => 'application/json'], json_encode([
-            'user' => 'nurse_test',
-            'password' => 'password123',
-            'name' => 'Test',
-            'surname' => 'User'
+            'user' => 'new_nurse',
+            'password' => 'newpassword123',
+            'name' => 'New',
+            'surname' => 'Nurse'
         ]));
 
         $response = $client->getResponse();
@@ -44,7 +46,7 @@ class NurseCRUDControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('POST', '/nurse/new', [], [], ['CONTENT_TYPE' => 'application/json'], json_encode([
-            'user' => 'nurse_test'
+            'user' => 'invalid_nurse'
         ]));
 
         $response = $client->getResponse();
@@ -59,8 +61,7 @@ class NurseCRUDControllerTest extends WebTestCase
     public function testShowNurseById(): void
     {
         $client = static::createClient();
-
-        $client->request('GET', '/nurse/1');
+        $client->request('GET', '/nurse/1'); // Cambiar ID según las fixtures
 
         $response = $client->getResponse();
         $this->assertEquals(
@@ -74,9 +75,8 @@ class NurseCRUDControllerTest extends WebTestCase
     public function testEditNurse(): void
     {
         $client = static::createClient();
-
         $client->request('PUT', '/nurse/1/edit', [], [], ['CONTENT_TYPE' => 'application/json'], json_encode([
-            'name' => 'Updated Name New'
+            'name' => 'Updated Name'
         ]));
 
         $response = $client->getResponse();
@@ -90,9 +90,7 @@ class NurseCRUDControllerTest extends WebTestCase
     public function testDeleteNurse(): void
     {
         $client = static::createClient();
-
-        // Asegúrate de que existe un enfermero con ID 1
-        $client->request('DELETE', '/nurse/1');
+        $client->request('DELETE', '/nurse/1'); // Cambiar ID según las fixtures
 
         $response = $client->getResponse();
         $this->assertEquals(
@@ -128,15 +126,14 @@ class NurseCRUDControllerTest extends WebTestCase
     public function testLoginNurse(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/nurse/login/test_user/password123');
+        $client->request('GET', '/nurse/login/nurse_test/password123');
 
         $response = $client->getResponse();
         $this->assertEquals(
             Response::HTTP_OK,
             $response->getStatusCode(),
-            "Failed asserting GET /nurse/login/test_user/password123 returns 200. Response: " . $response->getContent()
+            "Failed asserting GET /nurse/login/nurse_test/password123 returns 200. Response: " . $response->getContent()
         );
         $this->assertJson($response->getContent());
     }
 }
-
