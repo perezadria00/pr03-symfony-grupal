@@ -18,7 +18,7 @@ class NurseFixtures extends Fixture
         foreach ($nurses as $data) {
             $nurse = new Nurse();
             $nurse->setUser($data['user'])
-                  ->setPassword($data['password']) // Contraseña sin hashear para pruebas
+                  ->setPassword($data['password']) 
                   ->setName($data['name'])
                   ->setSurname($data['surname']);
 
