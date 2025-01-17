@@ -24,7 +24,7 @@ final class NurseCRUDController extends AbstractController
     {
         // Obtener todos los enfermeros de la base de datos
         $nurses = $nurseRepository->findAll();
-        
+
         if (empty($nurses)) {
             return new JsonResponse(
                 ['status' => 'error', 'message' => 'No nurses found'],
@@ -39,6 +39,9 @@ final class NurseCRUDController extends AbstractController
                 'name' => $nurse->getName(),
                 'surname' => $nurse->getSurname(),
                 'password' => $nurse->getPassword(),
+                'speciality' => $nurse->getSpeciality(),
+                'shift' => $nurse->getShift(),
+                'phone' => $nurse->getPhone()
             ];
         }, $nurses);
 
@@ -48,59 +51,65 @@ final class NurseCRUDController extends AbstractController
         );
     }
 
-// Añadir un nuevo enfermero
-#[Route('/new', name: 'app_nurse_c_r_u_d_new', methods: ['POST'])]
-public function new(Request $request, EntityManagerInterface $entityManager): Response
-{
-    // Crear nuevo objeto Nurse
-    $nurse = new Nurse();
+    // Añadir un nuevo enfermero
+    #[Route('/new', name: 'app_nurse_c_r_u_d_new', methods: ['POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        // Crear nuevo objeto Nurse
+        $nurse = new Nurse();
 
-    // Decodificar la solicitud JSON
-    $data = json_decode($request->getContent(), true);
+        // Decodificar la solicitud JSON
+        $data = json_decode($request->getContent(), true);
 
-    if ($data === null) {
+        if ($data === null) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Invalid JSON'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Configurar los valores del objeto Nurse usando los datos proporcionados
+        if (isset($data['username'], $data['password'], $data['name'], $data['surname'])) {
+            $nurse->setUser($data['username']);
+            $nurse->setPassword($data['password']);  // **Importante**: Hashear la contraseña en una implementación real
+            $nurse->setName($data['name']);
+            $nurse->setSurname($data['surname']);
+            $nurse->setSpeciality($data['speciality']);
+            $nurse->setShift($data['shift']);
+            $nurse->setPhone($data['phone']);
+        } else {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Missing required fields'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Guardar el objeto Nurse en la base de datos
+        try {
+            $entityManager->persist($nurse);
+            $entityManager->flush();
+        } catch (\Exception $e) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Failed to save the nurse: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        // Retornar el JSON de éxito
         return $this->json([
-            'status' => 'error',
-            'message' => 'Invalid JSON'
-        ], Response::HTTP_BAD_REQUEST);
-    }
-
-    // Configurar los valores del objeto Nurse usando los datos proporcionados
-    if (isset($data['user'], $data['password'], $data['name'], $data['surname'])) {
-        $nurse->setUser($data['user']);
-        $nurse->setPassword($data['password']);  // **Importante**: Hashear la contraseña en una implementación real
-        $nurse->setName($data['name']);
-        $nurse->setSurname($data['surname']);
-    } else {
-        return $this->json([
-            'status' => 'error',
-            'message' => 'Missing required fields'
-        ], Response::HTTP_BAD_REQUEST);
-    }
-
-    // Guardar el objeto Nurse en la base de datos
-    try {
-        $entityManager->persist($nurse);
-        $entityManager->flush();
-    } catch (\Exception $e) {
-        return $this->json([
-            'status' => 'error',
-            'message' => 'Failed to save the nurse: ' . $e->getMessage()
-        ], Response::HTTP_INTERNAL_SERVER_ERROR);
-    }
-
-    // Retornar el JSON de éxito
-    return $this->json([
-        'status' => 'success',
-        'nurse' => [
-            'id' => $nurse->getId(),
-            'name' => $nurse->getName(),
-            'surname' => $nurse->getSurname(),
-            'user' => $nurse->getUser(),
-            'password' => $nurse->getPassword()  // **No devolver la contraseña en producción**
+            'status' => 'success',
+            'nurse' => [
+                'id' => $nurse->getId(),
+                'name' => $nurse->getName(),
+                'surname' => $nurse->getSurname(),
+                'username' => $nurse->getUser(),
+                'password' => $nurse->getPassword(),
+                'Speciality' => $nurse->getSpeciality(),
+                'Shift' => $nurse->getShift(),
+                'Phone' => $nurse->getPhone()
         ]
-    ], Response::HTTP_CREATED);
-}
+        ], Response::HTTP_CREATED);
+    }
 
     // Devuelve un usuario dado un id
     #[Route('/{id}', name: 'app_nurse_c_r_u_d_show', methods: ['GET'])]
@@ -119,8 +128,11 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
             'ID' => $nurse->getId(),
             'Name' => $nurse->getName(),
             'Surname' => $nurse->getSurname(),
-            'User' => $nurse->getUser(),
-            'Password' => $nurse->getPassword()
+            'Username' => $nurse->getUser(),
+            'Password' => $nurse->getPassword(),
+            'Speciality' => $nurse->getSpeciality(),
+            'Shift' => $nurse->getShift(),
+            'Phone' => $nurse->getPhone()
         ];
 
         return new JsonResponse(['nurse' => $nurseData], Response::HTTP_OK);
@@ -133,19 +145,22 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
         $nurse = $nurseRepository->find($id);
 
         // Si el id introducido no se encuentra, muestra error 404
-    if (!$nurse) {
-        // En vez de lanzar una excepción, devuelve una respuesta adecuada
-        return $this->json(['error' => 'Nurse not found'], Response::HTTP_NOT_FOUND);
-    }
-    
+        if (!$nurse) {
+            // En vez de lanzar una excepción, devuelve una respuesta adecuada
+            return $this->json(['error' => 'Nurse not found'], Response::HTTP_NOT_FOUND);
+        }
+
 
         $data = json_decode($request->getContent(), true);
 
         // Si el id introducido se encuentra pero los datos de usuario o contraseña están vacios, muestra un error 400
-        $nurse->setUser($data['user'] ?? $nurse->getUser());
+        $nurse->setUser($data['username'] ?? $nurse->getUser());
         $nurse->setPassword($data['password'] ?? $nurse->getPassword());
         $nurse->setName($data['name'] ?? $nurse->getName());
         $nurse->setSurname($data['surname'] ?? $nurse->getSurname());
+        $nurse->setSpeciality($data['speciality'] ?? $nurse->getSpeciality());
+        $nurse->setShift($data['shift'] ?? $nurse->getSurname());
+        $nurse->setPhone($data['phone']) ?? $nurse->getPhone();
 
         $errors = $validator->validate($nurse);
 

@@ -14,9 +14,9 @@ class Nurse
     private ?int $id = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $user = null;
+    private ?string $username = null;
 
-    #[ORM\Column(length: 60)]
+    #[ORM\Column(length: 20)]
     private ?string $password = null;
 
     #[ORM\Column(length: 30, nullable: true)]
@@ -25,6 +25,15 @@ class Nurse
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $surname = null;
 
+    #[ORM\Column(length:30, nullable: true)]
+    private ?string $speciality = null;
+
+    #[ORM\Column(length:30, nullable: true)]
+    private ?string $shift = null;
+
+    #[ORM\Column(length:20, nullable: true)]
+    private ?string $phone = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -32,12 +41,12 @@ class Nurse
 
     public function getUser(): ?string
     {
-        return $this->user;
+        return $this->username;
     }
 
-    public function setUser(string $user): static
+    public function setUser(string $username): static
     {
-        $this->user = $user;
+        $this->username = $username;
 
         return $this;
     }
@@ -77,4 +86,44 @@ class Nurse
 
         return $this;
     }
+
+    public function getSpeciality(): ?string {
+        return $this->speciality;
+    }
+
+    public function setSpeciality(?string $speciality): static {
+        
+        $this->speciality = $speciality;
+
+        return $this;
+
+    }
+
+    public function getShift(): ?string {
+        return $this->shift;
+    }
+
+    public function setShift(?string $shift): static {
+        
+        $this->shift = $shift;
+
+        return $this;
+
+    }
+
+    public function getPhone(): ?string {
+        return $this->phone;
+    }
+
+    public function setPhone(?string $phone): static {
+        
+        $this->phone = $phone;
+
+        return $this;
+
+    }
+
+
+
+
 }
