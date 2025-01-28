@@ -20,10 +20,20 @@ final class NurseCRUDController extends AbstractController
 
     //devuelve todos los usuarios
     #[Route('/index', name: 'app_nurse_c_r_u_d_index', methods: ['GET'])]
-    public function getAll(NurseRepository $nurseRepository): JsonResponse
+    public function getAll(Request $request, NurseRepository $nurseRepository): JsonResponse
     {
+
+        $nameFilter = $request->query->get('name', '');
+        $surnameFilter = $request->query->get('surname', '');
+
         // Obtener todos los enfermeros de la base de datos
         $nurses = $nurseRepository->findAll();
+
+        // Filtrar por nombre o apellido si se proporciona
+        $filteredNurses = array_filter($nurses, function (Nurse $nurse) use ($nameFilter, $surnameFilter) {
+            return str_contains(strtolower($nurse->getName() ?? ''), strtolower($nameFilter)) ||
+            str_contains(strtolower($nurse->getSurname() ?? ''), strtolower($surnameFilter));
+        });
 
         if (empty($nurses)) {
             return new JsonResponse(
@@ -43,7 +53,7 @@ final class NurseCRUDController extends AbstractController
                 'shift' => $nurse->getShift(),
                 'phone' => $nurse->getPhone()
             ];
-        }, $nurses);
+        }, $filteredNurses);
 
         return new JsonResponse(
             ['status' => 'success', 'nurses' => $nursesData],
