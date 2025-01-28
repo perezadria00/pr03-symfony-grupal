@@ -39,12 +39,12 @@ class Nurse
         return $this->id;
     }
 
-    public function getUser(): ?string
+    public function getUsername(): ?string
     {
         return $this->username;
     }
 
-    public function setUser(string $username): static
+    public function setUsername(string $username): static
     {
         $this->username = $username;
 

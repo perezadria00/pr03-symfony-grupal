@@ -45,7 +45,7 @@ final class NurseCRUDController extends AbstractController
         $nursesData = array_map(function (Nurse $nurse) {
             return [
                 'id' => $nurse->getId(),
-                'username' => $nurse->getUser(),
+                'username' => $nurse->getUsername(),
                 'name' => $nurse->getName(),
                 'surname' => $nurse->getSurname(),
                 'password' => $nurse->getPassword(),
@@ -74,7 +74,7 @@ public function new(Request $request, EntityManagerInterface $entityManager, Nur
     }
 
     // Verificar si el usuario o teléfono ya existen
-    $existingUsername = $nurseRepository->findOneBy(['user' => $data['username']]);
+    $existingUsername = $nurseRepository->findOneBy(['username' => $data['username']]);
     $existingPhone = $nurseRepository->findOneBy(['phone' => $data['phone']]);
 
     if ($existingUsername) {
@@ -92,7 +92,7 @@ public function new(Request $request, EntityManagerInterface $entityManager, Nur
     }
 
     $nurse = new Nurse();
-    $nurse->setUser($data['username']);
+    $nurse->setUsername($data['username']);
     $nurse->setPassword($data['password']);
     $nurse->setName($data['name']);
     $nurse->setSurname($data['surname']);
@@ -117,7 +117,7 @@ public function new(Request $request, EntityManagerInterface $entityManager, Nur
             'id' => $nurse->getId(),
             'name' => $nurse->getName(),
             'surname' => $nurse->getSurname(),
-            'username' => $nurse->getUser(),
+            'username' => $nurse->getUsername(),
             'speciality' => $nurse->getSpeciality(),
             'shift' => $nurse->getShift(),
             'phone' => $nurse->getPhone()
@@ -143,7 +143,7 @@ public function new(Request $request, EntityManagerInterface $entityManager, Nur
             'ID' => $nurse->getId(),
             'Name' => $nurse->getName(),
             'Surname' => $nurse->getSurname(),
-            'Username' => $nurse->getUser(),
+            'Username' => $nurse->getUsername(),
             'Password' => $nurse->getPassword(),
             'Speciality' => $nurse->getSpeciality(),
             'Shift' => $nurse->getShift(),
@@ -169,7 +169,7 @@ public function new(Request $request, EntityManagerInterface $entityManager, Nur
         $data = json_decode($request->getContent(), true);
 
         // Si el id introducido se encuentra pero los datos de usuario o contraseña están vacios, muestra un error 400
-        $nurse->setUser($data['username'] ?? $nurse->getUser());
+        $nurse->setUsername($data['username'] ?? $nurse->getUsername());
         $nurse->setPassword($data['password'] ?? $nurse->getPassword());
         $nurse->setName($data['name'] ?? $nurse->getName());
         $nurse->setSurname($data['surname'] ?? $nurse->getSurname());
