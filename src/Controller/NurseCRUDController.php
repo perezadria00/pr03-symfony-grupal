@@ -18,48 +18,47 @@ final class NurseCRUDController extends AbstractController
 {
     //CRUD para entidad Nurse
 
-    //devuelve todos los usuarios
     #[Route('/index', name: 'app_nurse_c_r_u_d_index', methods: ['GET'])]
-    public function getAll(Request $request, NurseRepository $nurseRepository): JsonResponse
-    {
+public function getAll(Request $request, NurseRepository $nurseRepository): JsonResponse
+{
+    $nameFilter = $request->query->get('name', '');
+    $surnameFilter = $request->query->get('surname', '');
 
-        $nameFilter = $request->query->get('name', '');
-        $surnameFilter = $request->query->get('surname', '');
+    // Obtener todos los enfermeros de la base de datos
+    $nurses = $nurseRepository->findAll();
 
-        // Obtener todos los enfermeros de la base de datos
-        $nurses = $nurseRepository->findAll();
-
-        // Filtrar por nombre o apellido si se proporciona
-        $filteredNurses = array_filter($nurses, function (Nurse $nurse) use ($nameFilter, $surnameFilter) {
-            return str_contains(strtolower($nurse->getName() ?? ''), strtolower($nameFilter)) ||
+    // Filtrar por nombre o apellido si se proporciona
+    $filteredNurses = array_filter($nurses, function (Nurse $nurse) use ($nameFilter, $surnameFilter) {
+        return str_contains(strtolower($nurse->getName() ?? ''), strtolower($nameFilter)) ||
             str_contains(strtolower($nurse->getSurname() ?? ''), strtolower($surnameFilter));
-        });
+    });
 
-        if (empty($nurses)) {
-            return new JsonResponse(
-                ['status' => 'error', 'message' => 'No nurses found'],
-                Response::HTTP_BAD_REQUEST
-            );
-        }
-
-        $nursesData = array_map(function (Nurse $nurse) {
-            return [
-                'id' => $nurse->getId(),
-                'username' => $nurse->getUsername(),
-                'name' => $nurse->getName(),
-                'surname' => $nurse->getSurname(),
-                'password' => $nurse->getPassword(),
-                'speciality' => $nurse->getSpeciality(),
-                'shift' => $nurse->getShift(),
-                'phone' => $nurse->getPhone()
-            ];
-        }, $filteredNurses);
-
+    if (empty($filteredNurses)) {
         return new JsonResponse(
-            ['status' => 'success', 'nurses' => $nursesData],
-            Response::HTTP_OK
+            ['status' => 'error', 'message' => 'No nurses found'],
+            Response::HTTP_BAD_REQUEST
         );
     }
+
+    $nursesData = array_map(function (Nurse $nurse) {
+        return [
+            'id' => $nurse->getId(),
+            'username' => $nurse->getUsername(),
+            'name' => $nurse->getName(),
+            'surname' => $nurse->getSurname(),
+            'password' => $nurse->getPassword(),
+            'speciality' => $nurse->getSpeciality(),
+            'shift' => $nurse->getShift(),
+            'phone' => $nurse->getPhone(),
+        ];
+    }, $filteredNurses);
+
+    return new JsonResponse(
+        ['status' => 'success', 'nurses' => $nursesData],
+        Response::HTTP_OK
+    );
+}
+
 
     #[Route('/new', name: 'app_nurse_c_r_u_d_new', methods: ['POST'])]
 public function new(Request $request, EntityManagerInterface $entityManager, NurseRepository $nurseRepository): Response
