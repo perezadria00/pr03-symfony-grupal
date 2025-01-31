@@ -175,6 +175,11 @@ final class NurseCRUDController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
 
+        // Verificar si el JSON es válido
+        if ($data === null) {
+            return $this->json(['status' => 'error', 'message' => 'Invalid JSON'], Response::HTTP_BAD_REQUEST);
+        }
+
         // Si el id introducido se encuentra pero los datos de usuario o contraseña están vacios, muestra un error 400
         $nurse->setUsername($data['username'] ?? $nurse->getUsername());
         $nurse->setPassword($data['password'] ?? $nurse->getPassword());
@@ -182,11 +187,11 @@ final class NurseCRUDController extends AbstractController
         $nurse->setSurname($data['surname'] ?? $nurse->getSurname());
         $nurse->setSpeciality($data['speciality'] ?? $nurse->getSpeciality());
         $nurse->setShift($data['shift'] ?? $nurse->getSurname());
-        $nurse->setPhone($data['phone']) ?? $nurse->getPhone();
+        $nurse->setPhone($data['phone'] ?? $nurse->getPhone());
 
         $errors = $validator->validate($nurse);
 
-        if (count($errors) > 0) {
+        /*if (count($errors) > 0) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error->getMessage();
@@ -196,7 +201,31 @@ final class NurseCRUDController extends AbstractController
 
         $entityManager->flush();
 
-        return $this->json(['status' => 'success', 'message' => 'Nurse updated successfully'], Response::HTTP_OK);
+        return $this->json(['status' => 'success', 'message' => 'Nurse updated successfully'], Response::HTTP_OK);*/
+
+        // Guardar los cambios en la base de datos
+        
+        try {
+            $entityManager->flush();
+        } catch (\Exception $e) {
+            return $this->json(['status' => 'error', 'message' => 'Failed to update nurse: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        
+        // Devolver una respuesta exitosa con los datos actualizados
+        return $this->json([
+            'status' => 'success',
+            'message' => 'Nurse updated successfully',
+            'nurse' => [
+                'id' => $nurse->getId(),
+                'email' => $nurse->getEmail(),
+                'username' => $nurse->getUsername(),
+                'name' => $nurse->getName(),
+                'surname' => $nurse->getSurname(),
+                'speciality' => $nurse->getSpeciality(),
+                'shift' => $nurse->getShift(),
+                'phone' => $nurse->getPhone(),
+                ]
+            ], Response::HTTP_OK);
     }
 
     //elimina un usuario dado un id
