@@ -183,6 +183,7 @@ final class NurseCRUDController extends AbstractController
         // Si el id introducido se encuentra pero los datos de usuario o contraseña están vacios, muestra un error 400
         $nurse->setUsername($data['username'] ?? $nurse->getUsername());
         $nurse->setPassword($data['password'] ?? $nurse->getPassword());
+        $nurse->setEmail($data['email'] ?? $nurse->getEmail());
         $nurse->setName($data['name'] ?? $nurse->getName());
         $nurse->setSurname($data['surname'] ?? $nurse->getSurname());
         $nurse->setSpeciality($data['speciality'] ?? $nurse->getSpeciality());
