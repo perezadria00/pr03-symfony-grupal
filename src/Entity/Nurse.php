@@ -23,6 +23,9 @@ class Nurse
     private ?string $name = null;
 
     #[ORM\Column(length: 30, nullable: true)]
+    private ?string $email = null;
+
+    #[ORM\Column(length: 30, nullable: true)]
     private ?string $surname = null;
 
     #[ORM\Column(length:30, nullable: true)]
@@ -123,7 +126,14 @@ class Nurse
 
     }
 
+    public function getEmail(): ?string {
+        return $this->email;
+    }
 
+    public function setEmail(?string $email): static {
+        
+        $this->email = $email;
 
-
+        return $this;
+    }
 }

@@ -16,116 +16,124 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/nurse')]
 final class NurseCRUDController extends AbstractController
 {
-    //CRUD para entidad Nurse
+    // CRUD para entidad Nurse
 
     #[Route('/index', name: 'app_nurse_c_r_u_d_index', methods: ['GET'])]
-public function getAll(Request $request, NurseRepository $nurseRepository): JsonResponse
-{
-    $nameFilter = $request->query->get('name', '');
-    $surnameFilter = $request->query->get('surname', '');
+    public function getAll(Request $request, NurseRepository $nurseRepository): JsonResponse
+    {
+        $nameFilter = $request->query->get('name', '');
+        $surnameFilter = $request->query->get('surname', '');
 
-    // Obtener todos los enfermeros de la base de datos
-    $nurses = $nurseRepository->findAll();
+        // Obtener todos los enfermeros de la base de datos
+        $nurses = $nurseRepository->findAll();
 
-    // Filtrar por nombre o apellido si se proporciona
-    $filteredNurses = array_filter($nurses, function (Nurse $nurse) use ($nameFilter, $surnameFilter) {
-        return str_contains(strtolower($nurse->getName() ?? ''), strtolower($nameFilter)) ||
-            str_contains(strtolower($nurse->getSurname() ?? ''), strtolower($surnameFilter));
-    });
+        // Filtrar por nombre o apellido si se proporciona
+        $filteredNurses = array_filter($nurses, function (Nurse $nurse) use ($nameFilter, $surnameFilter) {
+            return str_contains(strtolower($nurse->getName() ?? ''), strtolower($nameFilter)) ||
+                str_contains(strtolower($nurse->getSurname() ?? ''), strtolower($surnameFilter));
+        });
 
-    if (empty($filteredNurses)) {
+        if (empty($filteredNurses)) {
+            return new JsonResponse(
+                ['status' => 'error', 'message' => 'No nurses found'],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        $nursesData = array_map(function (Nurse $nurse) {
+            return [
+                'id' => $nurse->getId(),
+                'username' => $nurse->getUsername(),
+                'email' => $nurse->getEmail(),
+                'name' => $nurse->getName(),
+                'surname' => $nurse->getSurname(),
+                'password' => $nurse->getPassword(),
+                'speciality' => $nurse->getSpeciality(),
+                'shift' => $nurse->getShift(),
+                'phone' => $nurse->getPhone(),
+            ];
+        }, $filteredNurses);
+
         return new JsonResponse(
-            ['status' => 'error', 'message' => 'No nurses found'],
-            Response::HTTP_BAD_REQUEST
+            ['status' => 'success', 'nurses' => $nursesData],
+            Response::HTTP_OK
         );
     }
 
-    $nursesData = array_map(function (Nurse $nurse) {
-        return [
-            'id' => $nurse->getId(),
-            'username' => $nurse->getUsername(),
-            'name' => $nurse->getName(),
-            'surname' => $nurse->getSurname(),
-            'password' => $nurse->getPassword(),
-            'speciality' => $nurse->getSpeciality(),
-            'shift' => $nurse->getShift(),
-            'phone' => $nurse->getPhone(),
-        ];
-    }, $filteredNurses);
-
-    return new JsonResponse(
-        ['status' => 'success', 'nurses' => $nursesData],
-        Response::HTTP_OK
-    );
-}
-
-
     #[Route('/new', name: 'app_nurse_c_r_u_d_new', methods: ['POST'])]
-public function new(Request $request, EntityManagerInterface $entityManager, NurseRepository $nurseRepository): Response
-{
-    $data = json_decode($request->getContent(), true);
+    public function new(Request $request, EntityManagerInterface $entityManager, NurseRepository $nurseRepository): Response
+    {
+        $data = json_decode($request->getContent(), true);
 
-    if ($data === null) {
+        if ($data === null) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Invalid JSON'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Verificar si el usuario, email o teléfono ya existen
+        $existingUsername = $nurseRepository->findOneBy(['username' => $data['username']]);
+        $existingEmail = $nurseRepository->findOneBy(['email' => $data['email']]);
+        $existingPhone = $nurseRepository->findOneBy(['phone' => $data['phone']]);
+
+        if ($existingUsername) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'El usuario ya está registrado.'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($existingEmail) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'El correo electrónico ya está registrado.'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($existingPhone) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'El teléfono ya está registrado.'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $nurse = new Nurse();
+        $nurse->setUsername($data['username']);
+        $nurse->setEmail($data['email']);
+        $nurse->setPassword($data['password']);
+        $nurse->setName($data['name']);
+        $nurse->setSurname($data['surname']);
+        $nurse->setSpeciality($data['speciality']);
+        $nurse->setShift($data['shift']);
+        $nurse->setPhone($data['phone']);
+
+        try {
+            $entityManager->persist($nurse);
+            $entityManager->flush();
+        } catch (\Exception $e) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Error al guardar el registro: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
         return $this->json([
-            'status' => 'error',
-            'message' => 'Invalid JSON'
-        ], Response::HTTP_BAD_REQUEST);
+            'status' => 'success',
+            'message' => 'Registro exitoso.',
+            'nurse' => [
+                'id' => $nurse->getId(),
+                'username' => $nurse->getUsername(),
+                'email' => $nurse->getEmail(),
+                'name' => $nurse->getName(),
+                'surname' => $nurse->getSurname(),
+                'speciality' => $nurse->getSpeciality(),
+                'shift' => $nurse->getShift(),
+                'phone' => $nurse->getPhone()
+            ]
+        ], Response::HTTP_CREATED);
     }
 
-    // Verificar si el usuario o teléfono ya existen
-    $existingUsername = $nurseRepository->findOneBy(['username' => $data['username']]);
-    $existingPhone = $nurseRepository->findOneBy(['phone' => $data['phone']]);
-
-    if ($existingUsername) {
-        return $this->json([
-            'status' => 'error',
-            'message' => 'El usuario ya está registrado.'
-        ], Response::HTTP_BAD_REQUEST);
-    }
-
-    if ($existingPhone) {
-        return $this->json([
-            'status' => 'error',
-            'message' => 'El teléfono ya está registrado.'
-        ], Response::HTTP_BAD_REQUEST);
-    }
-
-    $nurse = new Nurse();
-    $nurse->setUsername($data['username']);
-    $nurse->setPassword($data['password']);
-    $nurse->setName($data['name']);
-    $nurse->setSurname($data['surname']);
-    $nurse->setSpeciality($data['speciality']);
-    $nurse->setShift($data['shift']);
-    $nurse->setPhone($data['phone']);
-
-    try {
-        $entityManager->persist($nurse);
-        $entityManager->flush();
-    } catch (\Exception $e) {
-        return $this->json([
-            'status' => 'error',
-            'message' => 'Error al guardar el registro: ' . $e->getMessage()
-        ], Response::HTTP_INTERNAL_SERVER_ERROR);
-    }
-
-    return $this->json([
-        'status' => 'success',
-        'message' => 'Registro exitoso.',
-        'nurse' => [
-            'id' => $nurse->getId(),
-            'name' => $nurse->getName(),
-            'surname' => $nurse->getSurname(),
-            'username' => $nurse->getUsername(),
-            'speciality' => $nurse->getSpeciality(),
-            'shift' => $nurse->getShift(),
-            'phone' => $nurse->getPhone()
-        ]
-    ], Response::HTTP_CREATED);
-}
-
-
-    // Devuelve un usuario dado un id
     #[Route('/{id}', name: 'app_nurse_c_r_u_d_show', methods: ['GET'])]
     public function show(NurseRepository $nurseRepository, int $id): JsonResponse
     {
@@ -140,10 +148,10 @@ public function new(Request $request, EntityManagerInterface $entityManager, Nur
 
         $nurseData = [
             'ID' => $nurse->getId(),
+            'Username' => $nurse->getUsername(),
+            'Email' => $nurse->getEmail(),
             'Name' => $nurse->getName(),
             'Surname' => $nurse->getSurname(),
-            'Username' => $nurse->getUsername(),
-            'Password' => $nurse->getPassword(),
             'Speciality' => $nurse->getSpeciality(),
             'Shift' => $nurse->getShift(),
             'Phone' => $nurse->getPhone()
